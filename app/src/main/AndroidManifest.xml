@@ -29,11 +29,6 @@
         android:supportsRtl="true"
         android:theme="@style/FlorisAppTheme"
         tools:targetApi="s">
-        <activity
-            android:name=".MainActivity11"
-            android:exported="false"
-            android:label="@string/title_activity_main11"
-            android:theme="@style/FlorisAppTheme" />
         <!-- Allow app to be profiled for benchmarking and baseline profile generation -->
         <profileable android:shell="true" /> <!-- IME service -->
         <service

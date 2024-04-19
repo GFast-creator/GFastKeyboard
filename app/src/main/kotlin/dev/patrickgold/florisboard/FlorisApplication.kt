@@ -25,7 +25,9 @@ import android.content.IntentFilter
 import android.os.Handler
 import androidx.core.os.UserManagerCompat
 import dagger.hilt.android.HiltAndroidApp
+import dev.patrickgold.compose.tooltip.BuildConfig
 import dev.patrickgold.florisboard.app.florisPreferenceModel
+import dev.patrickgold.florisboard.app.settings.blacklist.room.AppDatabase
 import dev.patrickgold.florisboard.ime.clipboard.ClipboardManager
 import dev.patrickgold.florisboard.ime.core.SubtypeManager
 import dev.patrickgold.florisboard.ime.dictionary.DictionaryManager
@@ -47,6 +49,7 @@ import dev.patrickgold.jetpref.datastore.JetPref
 import org.florisboard.lib.kotlin.tryOrNull
 import org.florisboard.libnative.dummyAdd
 import java.lang.ref.WeakReference
+import javax.inject.Inject
 
 /**
  * Global weak reference for the [FlorisApplication] class. This is needed as in certain scenarios an application
@@ -68,6 +71,7 @@ class FlorisApplication : Application() {
 
     private val prefs by florisPreferenceModel()
     private val mainHandler by lazy { Handler(mainLooper) }
+    @Inject lateinit var db : AppDatabase
 
     val assetManager = lazy { AssetManager(this) }
     val cacheManager = lazy { CacheManager(this) }
@@ -75,7 +79,7 @@ class FlorisApplication : Application() {
     val editorInstance = lazy { EditorInstance(this) }
     val extensionManager = lazy { ExtensionManager(this) }
     val glideTypingManager = lazy { GlideTypingManager(this) }
-    val keyboardManager = lazy { KeyboardManager(this) }
+    val keyboardManager = lazy { KeyboardManager(this, db) }
     val nlpManager = lazy { NlpManager(this) }
     val subtypeManager = lazy { SubtypeManager(this) }
     val themeManager = lazy { ThemeManager(this) }

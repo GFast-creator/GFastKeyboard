@@ -910,5 +910,6 @@
         <item quantity="other">{v} items</item>
     </plurals>
     <string name="title_activity_main11">MainActivity11</string>
+    <string name="black_list">Чёрный список</string>
 
 </resources>

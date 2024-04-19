@@ -16,11 +16,9 @@
 
 package dev.patrickgold.florisboard.app
 
-import android.content.Intent
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -40,7 +38,7 @@ import dev.patrickgold.florisboard.app.settings.about.ThirdPartyLicensesScreen
 import dev.patrickgold.florisboard.app.settings.advanced.AdvancedScreen
 import dev.patrickgold.florisboard.app.settings.advanced.BackupScreen
 import dev.patrickgold.florisboard.app.settings.advanced.RestoreScreen
-import dev.patrickgold.florisboard.app.settings.blacklist.BlackListActivity
+import dev.patrickgold.florisboard.app.settings.blacklist.BlackListView
 import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.app.settings.clipboard.ClipboardScreen
 import dev.patrickgold.florisboard.app.settings.dictionary.DictionaryScreen
@@ -145,7 +143,9 @@ object Routes {
     fun AppNavHost(
         modifier: Modifier,
         navController: NavHostController,
-        startDestination: String
+        startDestination: String,
+        viewModel: WordViewModel,
+        onBackPressedDispatcher: OnBackPressedDispatcher
     ) {
         NavHost(
             modifier = modifier,
@@ -153,11 +153,7 @@ object Routes {
             startDestination = startDestination,
         ) {
             composable(Settings.BlackList) {
-                LocalContext.current.also{
-                        context -> context.startActivity(
-                    Intent(context, BlackListActivity::class.java)
-                    )
-                }
+                BlackListView(viewModel, onBackPressedDispatcher)
             }
 
             composable(Setup.Screen) { SetupScreen() }

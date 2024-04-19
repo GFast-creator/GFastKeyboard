@@ -61,8 +61,6 @@ interface WordDao {
     @Query("DELETE FROM words")
     suspend fun deleteAll()
 
-    //    @Query("UPDATE words SET isSelected = :newState WHERE id = :wordId")
-//    suspend fun updateWordState(wordId: Word, newState: Booleam)
     @Update
     suspend fun update(word:Word)
 }
@@ -74,6 +72,14 @@ interface WordDao {
 
 abstract class AppDatabase : RoomDatabase() {
     abstract val wordDao: WordDao
+
+    companion object{
+        fun create(context: Context) : AppDatabase{
+            return Room
+                .databaseBuilder(context, AppDatabase::class.java, "database.db")
+                .build()
+        }
+    }
 }
 
 
@@ -90,9 +96,7 @@ object HiltModule {
     @Singleton
     @Provides
     fun create(@ApplicationContext context : Context) : AppDatabase {
-        return Room
-            .databaseBuilder(context, AppDatabase::class.java, "database.db")
-            .build()
+        return AppDatabase.create(context)
     }
 
     @Singleton
@@ -118,9 +122,8 @@ object HiltModule {
 
     @Singleton
     @Provides
-    fun notificationManager(app: Application): NotificationManager {
-
-        return (app.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).apply {
+    fun notificationManager(@ApplicationContext context: Context): NotificationManager {
+        return (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 createNotificationChannel(
                     NotificationChannel(

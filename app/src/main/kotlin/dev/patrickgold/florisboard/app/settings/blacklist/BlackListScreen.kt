@@ -1,13 +1,13 @@
 package dev.patrickgold.florisboard.app.settings.blacklist
 
-import android.app.NotificationManager
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -48,31 +48,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
+import androidx.lifecycle.ViewModelProvider
 import dagger.hilt.android.AndroidEntryPoint
-import dev.patrickgold.florisboard.BuildConfig
-import dev.patrickgold.florisboard.Greeting
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.AppTheme
 import dev.patrickgold.florisboard.app.FlorisAppActivity
-import dev.patrickgold.florisboard.app.LocalNavController
 import dev.patrickgold.florisboard.app.apptheme.FlorisAppTheme
 import dev.patrickgold.florisboard.app.apptheme.ItemGreen
 import dev.patrickgold.florisboard.app.apptheme.ItemRed
-import dev.patrickgold.florisboard.app.apptheme.MyApplicationTheme
-import dev.patrickgold.florisboard.app.settings.blacklist.room.CONSTANTS.NOTIFICATION_ID
 import dev.patrickgold.florisboard.app.settings.blacklist.room.Word
 import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.lib.compose.FlorisScreen
-import dev.patrickgold.florisboard.lib.compose.stringRes
 import dev.patrickgold.florisboard.ui.theme.FlorisBoardTheme
 
-
-private lateinit var onBackPressedCallback: OnBackPressedCallback
 
 @AndroidEntryPoint
 class BlackListActivity : ComponentActivity() {
@@ -85,20 +77,21 @@ class BlackListActivity : ComponentActivity() {
         setContent {
             FlorisBoardTheme {
                 // A surface container using the 'background' color from the theme
-                MainView()
+                BlackListView(viewModel, onBackPressedDispatcher)
             }
         }
     }
 
     @Composable
     fun BlackListScreen(
-        viewModel: WordViewModel
+        viewModel: WordViewModel,
+        onBackPressedDispatcher: OnBackPressedDispatcher
     ) = FlorisScreen {
 
         title = "123"
 
         content {
-            MainView()
+            BlackListView(viewModel,onBackPressedDispatcher)
         }
     }
 
@@ -114,232 +107,228 @@ class BlackListActivity : ComponentActivity() {
             )
         }
     }
-
-    @OptIn(
-        ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
-        ExperimentalFoundationApi::class
-    )
-    @Composable
-    private fun MainView() {
-        var text by rememberSaveable { mutableStateOf("") }
-
-        val words = viewModel.words.collectAsState(initial = emptyList())
-        val selectedWords =
-            viewModel.selectedWords.collectAsState(initial = emptyList())//words.value.filter { word -> word.isSelected }
-        val isDialog = viewModel.dialogStateObj.isDialogStateFlow.collectAsState()
-        val selectedForDelete = viewModel.deleteWordsObj.stateFlowInstant.collectAsState()
-
-        viewModel.updateFoudation(selectedWords.value, text)
-
-
-        onBackPressedCallback = object : OnBackPressedCallback(false) {
-            override fun handleOnBackPressed() {
-                viewModel.deleteWordsObj.update(emptyList())
-                isEnabled = false
-            }
+}
+@Composable
+private fun WordCard(
+    modifier: Modifier,
+    wordObj: Word,
+    selected: Boolean,
+    selectedForDelete: Boolean
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.run {
+            if (selectedForDelete) {
+                cardColors(
+                    containerColor = ItemRed
+                )
+            } else if (selected) {
+                cardColors(
+                    containerColor = ItemGreen
+                )
+            } else cardColors()
         }
 
-        //TODO: onBackPressedDispatcher.addCallback(LocalLifecycleOwner.current, onBackPressedCallback)
+    ) {
+        // Тело карточки
+        Row {
+            Text(
+                wordObj.word,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+    }
+}
 
-        //диалог добавления слова
-        if (isDialog.value) {
-            var newWord by rememberSaveable {
-                mutableStateOf("")
-            }
 
-            AlertDialog(onDismissRequest = { viewModel.dialogStateObj.update(false) },
-                title = { Text(stringResource(R.string.adding_element)) },
-                text = {
-                    Column {
-                        if (words.value.any { p -> p.word == newWord }) {
-                            Text(stringResource(R.string.word_exist), color = Color.Red)
-                        }
-                        TextField(
-                            value = newWord,
-                            onValueChange = { newWord = it },
-                            label = {
-                                Text(
-                                    stringResource(R.string.new_word)
-                                )
-                            },
-                            singleLine = true
-                        )
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
+    ExperimentalFoundationApi::class
+)
+@Composable
+fun BlackListView(
+    viewModel : WordViewModel,
+    onBackPressedDispatcher : OnBackPressedDispatcher
+) {
+
+    var text by rememberSaveable { mutableStateOf("") }
+
+    val words by viewModel.words.collectAsState(initial = emptyList())
+    val selectedWords by viewModel.selectedWords.collectAsState(initial = emptyList())
+    val isDialog by viewModel.dialogStateObj.isDialogStateFlow.collectAsState()
+    val selectedForDelete by viewModel.deleteWordsObj.stateFlowInstant.collectAsState()
+
+    //viewModel.updateFoundation(selectedWords, text)
+
+    onBackPressedDispatcher.addCallback(LocalLifecycleOwner.current, viewModel.onBackPressedCallback)
+
+    //диалог добавления слова
+    if (isDialog) {
+        var newWord by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        AlertDialog(onDismissRequest = { viewModel.dialogStateObj.update(false) },
+            title = { Text(stringResource(R.string.adding_element)) },
+            text = {
+                Column {
+                    if (words.any { p -> p.word == newWord }) {
+                        Text(stringResource(R.string.word_exist), color = Color.Red)
                     }
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        if (newWord.isNotBlank() && words.value.none { p -> p.word == newWord }) {
-                            viewModel.save(Word(word = newWord))
-                            viewModel.dialogStateObj.update(false)
-                        }
-                    }) {
-                        Text(text = stringResource(R.string.ok))
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = {
+                    TextField(
+                        value = newWord,
+                        onValueChange = { newWord = it },
+                        label = {
+                            Text(
+                                stringResource(R.string.new_word)
+                            )
+                        },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (newWord.isNotBlank() && words.none { p -> p.word == newWord }) {
+                        viewModel.save(Word(word = newWord))
                         viewModel.dialogStateObj.update(false)
-                    }) {
-                        Text(text = stringResource(R.string.cancel))
+                    }
+                }) {
+                    Text(text = stringResource(R.string.ok))
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    viewModel.dialogStateObj.update(false)
+                }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.black_list)
+                    )
+                },
+                actions = {
+                    if (selectedForDelete.isNotEmpty()) {
+                        IconButton(onClick = {
+                            viewModel.deleteWordsObj.update(emptyList())
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(id = R.string.cancel)
+                            )
+                        }
+
+                        IconButton(onClick = {
+                            viewModel.deleteWordsObj.update(words)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.SelectAll,
+                                contentDescription = stringResource(id = R.string.select_all),
+                            )
+                        }
+                        IconButton(onClick = {
+                            viewModel.delete(*selectedForDelete.toTypedArray())
+
+                            viewModel.deleteWordsObj.update(emptyList())
+                            //updateFoundElements(selectedWords.value, text)
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete_selected)
+                            )
+                        }
                     }
                 }
             )
         }
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(R.string.app_name)
-                        )
+    ) { padding ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding), color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                /*TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = text,
+                    onValueChange = { s ->
+                        text = s
+                        //updateFoundElements(selectedWords.value, text)
                     },
-                    actions = {
-                        if (selectedForDelete.value.isNotEmpty()) {
-                            IconButton(onClick = {
-                                viewModel.deleteWordsObj.update(emptyList())
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(id = R.string.cancel)
-                                )
-                            }
+                    label = { Text(stringResource(R.string.search)) })*/
 
-                            IconButton(onClick = {
-                                viewModel.deleteWordsObj.update(words.value)
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.SelectAll,
-                                    contentDescription = stringResource(id = R.string.select_all),
-                                )
-                            }
-                            IconButton(onClick = {
-                                viewModel.delete(*selectedForDelete.value.toTypedArray())
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp, end = 4.dp, top = 4.dp),
+                    onClick = { viewModel.dialogStateObj.update(true) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.add)
+                    )
+                }
 
-                                viewModel.deleteWordsObj.update(emptyList())
-                                //updateFoundElements(selectedWords.value, text)
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = stringResource(R.string.delete_selected)
-                                )
-                            }
-                        }
-                    }
-                )
-            }
-        ) { padding ->
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding), color = MaterialTheme.colorScheme.background
-            ) {
-                Column {
-                    TextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = text,
-                        onValueChange = { s ->
-                            text = s
-                            //updateFoundElements(selectedWords.value, text)
-                        },
-                        label = { Text(stringResource(R.string.search)) })
-
-                    Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 4.dp, end = 4.dp, top = 4.dp),
-                        onClick = { viewModel.dialogStateObj.update(true) }) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.add)
-                        )
-                    }
-
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        //items(words.value.size, key = { it }) { index ->
-                        words.value.forEachIndexed { index, word ->
-                            WordCard(
-                                modifier = Modifier
-                                    .padding(top = 8.dp, start = 4.dp, end = 4.dp)
-                                    .wrapContentSize()
-                                    .combinedClickable(
-                                        onClick = {
-                                            if (selectedForDelete.value.isNotEmpty()) {
-                                                if (word !in selectedForDelete.value)
-                                                    viewModel.deleteWordsObj += word
-                                                else
-                                                    viewModel.deleteWordsObj -= word
-
-                                                viewModel.vibrate()
-                                            } else {
-                                                viewModel.updateWordState(
-                                                    word = word,
-                                                    newState = word !in selectedWords.value
-                                                )
-
-                                                //updateFoundElements(selectedWords.value, text)
-                                            }
-                                        },
-                                        onLongClick = {
-                                            if (selectedForDelete.value.isEmpty()) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    //items(words.value.size, key = { it }) { index ->
+                    words.forEach { word ->
+                        WordCard(
+                            modifier = Modifier
+                                .padding(top = 8.dp, start = 4.dp, end = 4.dp)
+                                .wrapContentSize()
+                                .combinedClickable(
+                                    onClick = {
+                                        if (selectedForDelete.isNotEmpty()) {
+                                            if (word !in selectedForDelete)
                                                 viewModel.deleteWordsObj += word
-                                                onBackPressedCallback.isEnabled = true
-                                                viewModel.vibrate()
-                                            }
+                                            else
+                                                viewModel.deleteWordsObj -= word
+
+                                            viewModel.vibrate()
+                                        } else {
+                                            viewModel.updateWordState(
+                                                word = word,
+                                                newState = word !in selectedWords
+                                            )
+
+                                            //updateFoundElements(selectedWords.value, text)
                                         }
-                                    ),
-                                wordObj = word,
-                                selected = word in selectedWords.value,
-                                selectedForDelete = word in selectedForDelete.value)
+                                    },
+                                    onLongClick = {
+                                        if (selectedForDelete.isEmpty()) {
+                                            viewModel.deleteWordsObj += word
+                                            viewModel.onBackPressedCallback.isEnabled = true
+                                            viewModel.vibrate()
+                                        }
+                                    }
+                                ),
+                            wordObj = word,
+                            selected = word in selectedWords,
+                            selectedForDelete = word in selectedForDelete)
+                    }
+
+                    if (words.isEmpty()){
+                        Column {
+                            Row {
+                                //TODO: Доделать пример при пустом списке
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    //вибрация
-    private fun vibrate(vibrator: Vibrator) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            vibrator.vibrate(VibrationEffect.createOneShot(50, 255))
-    }
-
-
-    @Composable
-    private fun WordCard(
-        modifier: Modifier,
-        wordObj: Word,
-        selected: Boolean,
-        selectedForDelete: Boolean
-    ) {
-        Card(
-            modifier = modifier,
-            colors = CardDefaults.run {
-                if (selectedForDelete) {
-                    cardColors(
-                        containerColor = ItemRed
-                    )
-                } else if (selected) {
-                    cardColors(
-                        containerColor = ItemGreen
-                    )
-                } else cardColors()
-            }
-
-        ) {
-            // Тело карточки
-            Row {
-                Text(
-                    wordObj.word,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .align(Alignment.CenterVertically)
-                )
             }
         }
     }

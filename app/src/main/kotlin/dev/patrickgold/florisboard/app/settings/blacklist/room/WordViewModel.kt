@@ -1,11 +1,10 @@
 package dev.patrickgold.florisboard.app.settings.blacklist.room
 
-import android.app.Notification
 import android.app.NotificationManager
-import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.activity.OnBackPressedCallback
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +13,8 @@ import dev.patrickgold.florisboard.app.settings.blacklist.room.CONSTANTS.NOTIFIC
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +24,17 @@ class WordViewModel @Inject constructor(room: AppDatabase) : ViewModel() {
     @Inject lateinit var notification: NotificationCompat.Builder
     @Inject lateinit var notificationManager: NotificationManager
     @Inject lateinit var vibrator: Vibrator
+
+    var onBackPressedCallback = object : OnBackPressedCallback(false){
+        override fun handleOnBackPressed() {
+            viewModelScope.launch {
+                if (deleteWordsObj.stateFlowInstant.value.isNotEmpty()){
+                    deleteWordsObj.update(emptyList())
+                    isEnabled = false
+                }
+            }
+        }
+    }
 
     private val dao = room.wordDao
 
@@ -42,7 +54,6 @@ class WordViewModel @Inject constructor(room: AppDatabase) : ViewModel() {
     val dialogStateObj = DialogStateObject
 
     object DeleteWordsObj{
-
         private val _wordsForDelete = MutableStateFlow(emptyList<Word>())
         val stateFlowInstant : StateFlow<List<Word>>
             get() = _wordsForDelete.asStateFlow()
@@ -78,14 +89,14 @@ class WordViewModel @Inject constructor(room: AppDatabase) : ViewModel() {
         viewModelScope.launch { dao.update(word) }
     }
 
-    fun updateFoudation(_selectedWordsds: List<Word>, text: String) {
+    fun updateFoundation(selectedWords: List<Word>, text: String) {
 
         notificationManager.cancel(NOTIFICATION_ID)
 
-        val founded = _selectedWordsds.filter { p -> text.contains(p.word) }
+        val founded = selectedWords.filter { p -> text.contains(p.word) }
         if (founded.isEmpty()) return
 
-        notification.setContentText("найденные элементы:\n"
+        notification.setContentText("Найденные элементы:\n"
                 + founded.joinToString(separator = ",\n") {
                 it.word
             }

@@ -16,11 +16,9 @@
 
 package dev.patrickgold.florisboard.app
 
-import android.app.NotificationManager
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -38,7 +36,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.core.app.NotificationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
@@ -62,7 +59,6 @@ import dev.patrickgold.florisboard.lib.compose.stringRes
 import dev.patrickgold.florisboard.lib.util.AppVersionUtils
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
-import javax.inject.Inject
 
 enum class AppTheme(val id: String) {
     AUTO("auto"),
@@ -79,9 +75,7 @@ val LocalNavController = staticCompositionLocalOf<NavController> {
 @AndroidEntryPoint
 class FlorisAppActivity : ComponentActivity() {
 
-    @Inject lateinit var vibrator: Vibrator
-
-    //private val viewModel : WordViewModel by viewModels()
+    private val wordViewModel : WordViewModel by viewModels()
 
     private val prefs by florisPreferenceModel()
     private var appTheme by mutableStateOf(AppTheme.AUTO)
@@ -90,6 +84,7 @@ class FlorisAppActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Splash screen should be installed before calling super.onCreate()
+
         installSplashScreen().apply {
             setKeepOnScreenCondition { !prefs.datastoreReadyStatus.get() }
         }
@@ -175,6 +170,8 @@ class FlorisAppActivity : ComponentActivity() {
                         modifier = Modifier.weight(1.0f),
                         navController = navController,
                         startDestination = if (isImeSetUp) Routes.Settings.Home else Routes.Setup.Screen,
+                        wordViewModel,
+                        onBackPressedDispatcher
                     )
                     PreviewKeyboardField(previewFieldController)
                 }

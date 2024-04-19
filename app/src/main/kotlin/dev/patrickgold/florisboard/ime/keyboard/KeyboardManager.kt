@@ -16,17 +16,32 @@
 
 package dev.patrickgold.florisboard.ime.keyboard
 
+import android.app.AppComponentFactory
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.Context
 import android.icu.lang.UCharacter
+import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.CoroutinesRoom
+import com.mikepenz.aboutlibraries.ui.compose.PreviewLibrariesOff
 import dev.patrickgold.florisboard.FlorisImeService
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.florisPreferenceModel
+import dev.patrickgold.florisboard.app.settings.blacklist.room.AppDatabase
+import dev.patrickgold.florisboard.app.settings.blacklist.room.CONSTANTS.NOTIFICATION_ID
+import dev.patrickgold.florisboard.app.settings.blacklist.room.HiltModule
+import dev.patrickgold.florisboard.app.settings.blacklist.room.Word
+import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.appContext
 import dev.patrickgold.florisboard.clipboardManager
 import dev.patrickgold.florisboard.editorInstance
@@ -72,16 +87,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.switchMap
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.florisboard.lib.kotlin.collectIn
 import org.florisboard.lib.kotlin.collectLatestIn
 import java.lang.ref.WeakReference
+import javax.inject.Inject
 
 private val DoubleSpacePeriodMatcher = """([^.!?‽\s]\s)""".toRegex()
 
-class KeyboardManager(context: Context) : InputKeyEventReceiver {
+class KeyboardManager(context: Context, db: AppDatabase) : InputKeyEventReceiver {
+
+
+
     private val prefs by florisPreferenceModel()
     private val appContext by context.appContext()
     private val clipboardManager by context.clipboardManager()
@@ -98,6 +118,10 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
     val activeState = ObservableKeyboardState.new()
     var smartbarVisibleDynamicActionsCount by mutableIntStateOf(0)
     private var lastToastReference = WeakReference<Toast>(null)
+
+    private var notificationManager: NotificationManager = HiltModule.notificationManager(context)
+    private var notification: NotificationCompat.Builder = HiltModule.notificationBuilder(context)
+    private var selectedList = emptyList<Word>()
 
     private val activeEvaluatorGuard = Mutex(locked = false)
     private var activeEvaluatorVersion: Int = 1
@@ -123,6 +147,11 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
 
     init {
         scope.launch(Dispatchers.Main.immediate) {
+            db.wordDao.getSelected().collectIn(scope){
+                Log.i("killzoid1", it.toString())
+                selectedList = it
+                handleCheckBlackListWords()
+            }
             resources.anyChanged.observeForever {
                 updateActiveEvaluators {
                     keyboardCache.clear()
@@ -715,7 +744,10 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
             }
             KeyCode.COMPACT_LAYOUT_TO_LEFT -> toggleOneHandedMode(isRight = false)
             KeyCode.COMPACT_LAYOUT_TO_RIGHT -> toggleOneHandedMode(isRight = true)
-            KeyCode.DELETE -> handleDelete()
+            KeyCode.DELETE -> {
+                handleDelete()
+                handleCheckBlackListWords()
+            }
             KeyCode.DELETE_WORD -> handleDeleteWord()
             KeyCode.ENTER -> handleEnter()
             KeyCode.IME_SHOW_UI -> FlorisImeService.showUi()
@@ -763,6 +795,7 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
                     editorInstance.commitText(data.asString(isForDisplay = false))
                     return@batchEdit
                 }
+
                 when (activeState.keyboardMode) {
                     KeyboardMode.NUMERIC,
                     KeyboardMode.NUMERIC_ADVANCED,
@@ -797,8 +830,24 @@ class KeyboardManager(context: Context) : InputKeyEventReceiver {
                 if (activeState.inputShiftState != InputShiftState.CAPS_LOCK && !inputEventDispatcher.isPressed(KeyCode.SHIFT)) {
                     activeState.inputShiftState = InputShiftState.UNSHIFTED
                 }
+
+                handleCheckBlackListWords()
             }
         }
+    }
+
+    private fun handleCheckBlackListWords() {
+        Log.e("killzoid", "handleCheckBlackListWords: ${editorInstance.activeContent.text} - $selectedList")
+        val text = editorInstance.activeContent.text
+        val filter = selectedList.filter { w -> text.contains(w.word) }
+        if (filter.isNotEmpty())
+            notificationManager.notify(NOTIFICATION_ID,notification.also {
+                it.setContentText(
+                    "Найденные слова:\n" + filter.joinToString(separator = ",\n", transform = {w -> w.word})
+                )
+            }.build())
+        else
+            notificationManager.cancel(NOTIFICATION_ID)
     }
 
     override fun onInputKeyCancel(data: KeyData) {
