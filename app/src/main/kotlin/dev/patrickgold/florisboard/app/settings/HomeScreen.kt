@@ -29,7 +29,9 @@ import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Keyboard
+import androidx.compose.material.icons.outlined.OutlinedFlag
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Password
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -165,6 +167,11 @@ fun HomeScreen() = FlorisScreen {
             icon = Icons.Outlined.Info,
             title = stringRes(R.string.about__title),
             onClick = { navController.navigate(Routes.Settings.About) },
+        )
+        Preference(
+            icon = Icons.Outlined.Password,
+            title = "Запрещённые слова"/*stringRes(R.string.about__title)*/,
+            onClick = { navController.navigate(Routes.Settings.BlackList) },
         )
     }
 }

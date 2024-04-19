@@ -24,4 +24,7 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.mannodermaus.android.junit5) apply false
     alias(libs.plugins.mikepenz.aboutlibraries) apply false
+
+    id("com.google.dagger.hilt.android") version "2.48" apply false
+    kotlin("kapt") version "1.9.0"
 }

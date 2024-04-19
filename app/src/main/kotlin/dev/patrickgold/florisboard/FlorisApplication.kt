@@ -24,6 +24,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import androidx.core.os.UserManagerCompat
+import dagger.hilt.android.HiltAndroidApp
 import dev.patrickgold.florisboard.app.florisPreferenceModel
 import dev.patrickgold.florisboard.ime.clipboard.ClipboardManager
 import dev.patrickgold.florisboard.ime.core.SubtypeManager
@@ -53,6 +54,7 @@ import java.lang.ref.WeakReference
  */
 private var FlorisApplicationReference = WeakReference<FlorisApplication?>(null)
 
+@HiltAndroidApp
 @Suppress("unused")
 class FlorisApplication : Application() {
     companion object {

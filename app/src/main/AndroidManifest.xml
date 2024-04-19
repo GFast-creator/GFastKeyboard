@@ -1,42 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2020-2022 Patrick Goldinger
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Permission needed to vibrate if the user has key press vibration enabled -->
-    <uses-permission android:name="android.permission.VIBRATE"/>
-
-    <!-- Permission needed to create notifications on devices running Android 13+ -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-
-    <!-- Android 11+ only: Define that FlorisBoard requests to see all apps that
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permission needed to create notifications on devices running Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+ Android 11+ only: Define that FlorisBoard requests to see all apps that
           ship with an IME or Spell Check service. This is used to guide the user
           in the Settings Ui why FlorisBoard may not be working.
-     -->
+    -->
     <queries>
         <intent>
-            <action android:name="android.view.InputMethod"/>
+            <action android:name="android.view.InputMethod" />
         </intent>
         <intent>
-            <action android:name="android.service.textservice.SpellCheckerService"/>
+            <action android:name="android.service.textservice.SpellCheckerService" />
         </intent>
     </queries>
 
     <application
-        android:name="dev.patrickgold.florisboard.FlorisApplication"
+        android:name=".FlorisApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/backup_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -46,123 +29,141 @@
         android:supportsRtl="true"
         android:theme="@style/FlorisAppTheme"
         tools:targetApi="s">
-
-        <!-- Allow app to be profiled for benchmarking and baseline profile generation -->
-        <profileable android:shell="true"/>
-
-        <!-- IME service -->
-        <service
-            android:name="dev.patrickgold.florisboard.FlorisImeService"
-            android:label="@string/floris_app_name"
-            android:permission="android.permission.BIND_INPUT_METHOD"
-            android:directBootAware="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.view.InputMethod"/>
-            </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/method"/>
-        </service>
-
-        <!-- Spellchecker service -->
-        <service
-            android:name="dev.patrickgold.florisboard.FlorisSpellCheckerService"
-            android:label="@string/floris_app_name"
-            android:permission="android.permission.BIND_TEXT_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.textservice.SpellCheckerService"/>
-            </intent-filter>
-            <meta-data android:name="android.view.textservice.scs" android:resource="@xml/spellchecker"/>
-        </service>
-
-        <!-- Main App Activity -->
         <activity
-            android:name="dev.patrickgold.florisboard.app.FlorisAppActivity"
+            android:name=".MainActivity11"
+            android:exported="false"
+            android:label="@string/title_activity_main11"
+            android:theme="@style/FlorisAppTheme" />
+        <!-- Allow app to be profiled for benchmarking and baseline profile generation -->
+        <profileable android:shell="true" /> <!-- IME service -->
+        <service
+            android:name=".FlorisImeService"
+            android:directBootAware="true"
+            android:exported="true"
+            android:label="@string/floris_app_name"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service> <!-- Spellchecker service -->
+        <service
+            android:name=".FlorisSpellCheckerService"
+            android:exported="true"
+            android:label="@string/floris_app_name"
+            android:permission="android.permission.BIND_TEXT_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.textservice.SpellCheckerService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.view.textservice.scs"
+                android:resource="@xml/spellchecker" />
+        </service> <!-- Main App Activity -->
+        <activity
+            android:name=".app.FlorisAppActivity"
+            android:exported="false"
             android:icon="@mipmap/floris_app_icon"
             android:label="@string/settings__title"
             android:launchMode="singleTask"
             android:roundIcon="@mipmap/floris_app_icon_round"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/FlorisAppTheme.Splash"
-            android:exported="false">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <data android:scheme="florisboard" android:host="app-ui"/>
+                <data
+                    android:host="app-ui"
+                    android:scheme="florisboard" />
             </intent-filter>
-        </activity>
-
-        <!-- Using an activity alias to disable/enable the app icon in the launcher -->
+        </activity> <!-- Using an activity alias to disable/enable the app icon in the launcher -->
         <activity-alias
-            android:name="dev.patrickgold.florisboard.SettingsLauncherAlias"
+            android:name=".SettingsLauncherAlias"
+            android:exported="true"
             android:icon="@mipmap/floris_app_icon"
             android:label="@string/floris_app_name"
             android:launchMode="singleTask"
             android:roundIcon="@mipmap/floris_app_icon_round"
-            android:targetActivity="dev.patrickgold.florisboard.app.FlorisAppActivity"
-            android:theme="@style/FlorisAppTheme.Splash"
-            android:exported="true">
+            android:targetActivity=".app.FlorisAppActivity"
+            android:theme="@style/FlorisAppTheme.Splash">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
 
-        <!-- Import File Bridging Activity -->
         <activity
-            android:name="dev.patrickgold.florisboard.app.ext.ImportFileActivity"
+            android:name=".app.settings.blacklist.BlackListActivity"
+            android:exported="true"
+            android:icon="@mipmap/floris_app_icon"
+            android:label="BlackList"
+            android:roundIcon="@mipmap/floris_app_icon_round"
+            android:theme="@style/FlorisAppTheme.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- Import File Bridging Activity -->
+
+        <activity
+            android:name=".app.ext.ImportFileActivity"
+            android:exported="true"
             android:icon="@mipmap/floris_app_icon"
             android:label="@string/settings__title"
             android:launchMode="singleTask"
             android:roundIcon="@mipmap/floris_app_icon_round"
-            android:windowSoftInputMode="adjustResize"
             android:theme="@style/FlorisAppTheme"
-            android:exported="true">
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="*" android:host="*" android:pathPattern=".*\\.flex"/>
-                <data android:scheme="*" android:host="*" android:pathPattern=".*\\.xpi"/>
-            </intent-filter>
-        </activity>
+                <action android:name="android.intent.action.VIEW" />
 
-        <!-- Crash Dialog Activity -->
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="*"
+                    android:pathPattern=".*\\.flex"
+                    android:scheme="*" />
+                <data
+                    android:host="*"
+                    android:pathPattern=".*\\.xpi"
+                    android:scheme="*" />
+            </intent-filter>
+        </activity> <!-- Crash Dialog Activity -->
         <activity
-            android:name="dev.patrickgold.florisboard.lib.crashutility.CrashDialogActivity"
+            android:name=".lib.crashutility.CrashDialogActivity"
             android:icon="@mipmap/floris_app_icon"
             android:label="@string/crash_dialog__title"
-            android:theme="@style/CrashDialogTheme"/>
-
-        <!-- Copy to Clipboard Activity -->
+            android:theme="@style/CrashDialogTheme" /> <!-- Copy to Clipboard Activity -->
         <activity
-            android:name="dev.patrickgold.florisboard.FlorisCopyToClipboardActivity"
-            android:theme="@style/FlorisAppTheme.Transparent"
-            android:exported="true">
+            android:name=".FlorisCopyToClipboardActivity"
+            android:exported="true"
+            android:theme="@style/FlorisAppTheme.Transparent">
             <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="image/*"/>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="image/*" />
             </intent-filter>
-        </activity>
+        </activity> <!-- Clipboard Media File Provider -->
 
-        <!-- Clipboard Media File Provider -->
         <provider
-            android:name="dev.patrickgold.florisboard.ime.clipboard.provider.ClipboardMediaProvider"
+            android:name=".ime.clipboard.provider.ClipboardMediaProvider"
             android:authorities="${applicationId}.provider.clipboard"
-            android:grantUriPermissions="true"
-            android:exported="false">
-        </provider>
-
-        <!-- Default file provider to share files from the "files" or "cache" dir -->
+            android:exported="false"
+            android:grantUriPermissions="true"></provider> <!-- Default file provider to share files from the "files" or "cache" dir -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider.file"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
-        </provider>
-
-        <!-- Disable default EmojiCompat initializer -->
+                android:resource="@xml/file_paths" />
+        </provider> <!-- Disable default EmojiCompat initializer -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -170,9 +171,8 @@
             tools:node="merge">
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
-                tools:node="remove"/>
+                tools:node="remove" />
         </provider>
-
     </application>
 
 </manifest>

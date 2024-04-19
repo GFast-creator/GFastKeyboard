@@ -1,5 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">FlorisBoard</string>
+    <string name="hello_world">Hello world!1!!11!</string>
+    <string name="delete">Удалить</string>
+    <string name="adding_element">Добавление элемента</string>
+    <string name="new_word">Новое слово</string>
+    <string name="word_exist">Слово существует</string>
+    <string name="ok">Ок</string>
+    <string name="cancel">Отмена</string>
+    <string name="search">Поиск</string>
+    <string name="add">Добавить</string>
+    <string name="delete_all">Удалить всё</string>
+    <string name="select_all">Выделить всё</string>
+    <string name="delete_selected">Удалить выделеное</string>
+    <string name="founded_elements">Найденые элементы:\n</string>
 
     <string name="key__phone_pause" comment="Label for the Pause key in the telephone keyboard layout">Pause</string>
     <string name="key__phone_wait" comment="Label for the Wait key in the telephone keyboard layout">Wait</string>
@@ -73,9 +86,9 @@
     <string name="quick_action__voice_input__tooltip" comment="IME stands for Input Method Editor and is indirectly equivalent to 'keyboard'.">Open voice input provider</string>
     <string name="quick_action__one_handed_mode" maxLength="12">One-handed</string>
     <string name="quick_action__one_handed_mode__tooltip">Toggle one-handed mode</string>
-    <string name="quick_action__drag_marker" maxLength="12" comment="This action is only used as a placeholder in the actions editor drag and drop screen and only visible in debug mode">Drag marker</string>
+    <string name="quick_action__drag_marker" comment="This action is only used as a placeholder in the actions editor drag and drop screen and only visible in debug mode" maxLength="12">Drag marker</string>
     <string name="quick_action__drag_marker__tooltip" comment="This action is only used as a placeholder in the actions editor drag and drop screen and only visible in debug mode">Current drag marker position</string>
-    <string name="quick_action__noop" maxLength="12" comment="Noop=no operation; this action is only used as a placeholder in the actions editor drag and drop screen">None</string>
+    <string name="quick_action__noop" comment="Noop=no operation; this action is only used as a placeholder in the actions editor drag and drop screen" maxLength="12">None</string>
     <string name="quick_action__noop__tooltip" comment="Noop=no operation; this action is only used as a placeholder in the actions editor drag and drop screen">No operation</string>
     <string name="quick_actions_overflow__customize_actions_button">Reorder actions</string>
     <string name="quick_actions_editor__header">Customize action order</string>
@@ -896,5 +909,6 @@
         <item quantity="one">{v} item</item>
         <item quantity="other">{v} items</item>
     </plurals>
+    <string name="title_activity_main11">MainActivity11</string>
 
 </resources>

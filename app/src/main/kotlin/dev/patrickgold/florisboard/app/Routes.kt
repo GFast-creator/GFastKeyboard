@@ -16,8 +16,11 @@
 
 package dev.patrickgold.florisboard.app
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,6 +40,8 @@ import dev.patrickgold.florisboard.app.settings.about.ThirdPartyLicensesScreen
 import dev.patrickgold.florisboard.app.settings.advanced.AdvancedScreen
 import dev.patrickgold.florisboard.app.settings.advanced.BackupScreen
 import dev.patrickgold.florisboard.app.settings.advanced.RestoreScreen
+import dev.patrickgold.florisboard.app.settings.blacklist.BlackListActivity
+import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.app.settings.clipboard.ClipboardScreen
 import dev.patrickgold.florisboard.app.settings.dictionary.DictionaryScreen
 import dev.patrickgold.florisboard.app.settings.dictionary.UserDictionaryScreen
@@ -65,6 +70,7 @@ object Routes {
     }
 
     object Settings {
+        const val BlackList = "words"
         const val Home = "settings"
 
         const val Localization = "settings/localization"
@@ -139,13 +145,21 @@ object Routes {
     fun AppNavHost(
         modifier: Modifier,
         navController: NavHostController,
-        startDestination: String,
+        startDestination: String
     ) {
         NavHost(
             modifier = modifier,
             navController = navController,
             startDestination = startDestination,
         ) {
+            composable(Settings.BlackList) {
+                LocalContext.current.also{
+                        context -> context.startActivity(
+                    Intent(context, BlackListActivity::class.java)
+                    )
+                }
+            }
+
             composable(Setup.Screen) { SetupScreen() }
 
             composable(Settings.Home) { HomeScreen() }

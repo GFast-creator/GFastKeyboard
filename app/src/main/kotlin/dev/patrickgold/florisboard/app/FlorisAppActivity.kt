@@ -16,11 +16,14 @@
 
 package dev.patrickgold.florisboard.app
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -35,12 +38,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.apptheme.FlorisAppTheme
+import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.app.setup.NotificationPermissionState
 import dev.patrickgold.florisboard.lib.FlorisLocale
 import dev.patrickgold.florisboard.lib.android.AndroidVersion
@@ -56,6 +62,7 @@ import dev.patrickgold.florisboard.lib.compose.stringRes
 import dev.patrickgold.florisboard.lib.util.AppVersionUtils
 import dev.patrickgold.jetpref.datastore.model.observeAsState
 import dev.patrickgold.jetpref.datastore.ui.ProvideDefaultDialogPrefStrings
+import javax.inject.Inject
 
 enum class AppTheme(val id: String) {
     AUTO("auto"),
@@ -69,7 +76,13 @@ val LocalNavController = staticCompositionLocalOf<NavController> {
     error("LocalNavController not initialized")
 }
 
+@AndroidEntryPoint
 class FlorisAppActivity : ComponentActivity() {
+
+    @Inject lateinit var vibrator: Vibrator
+
+    //private val viewModel : WordViewModel by viewModels()
+
     private val prefs by florisPreferenceModel()
     private var appTheme by mutableStateOf(AppTheme.AUTO)
     private var showAppIcon = true
