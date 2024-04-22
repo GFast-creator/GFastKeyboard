@@ -1,13 +1,8 @@
 package dev.patrickgold.florisboard.app.settings.blacklist
 
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,15 +25,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,11 +43,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
 import dagger.hilt.android.AndroidEntryPoint
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.AppTheme
-import dev.patrickgold.florisboard.app.FlorisAppActivity
 import dev.patrickgold.florisboard.app.apptheme.FlorisAppTheme
 import dev.patrickgold.florisboard.app.apptheme.ItemGreen
 import dev.patrickgold.florisboard.app.apptheme.ItemRed
@@ -76,7 +65,7 @@ class BlackListActivity : ComponentActivity() {
 
         setContent {
             FlorisBoardTheme {
-                BlackListView(viewModel, onBackPressedDispatcher)
+                BlackListScreen(viewModel, onBackPressedDispatcher)
             }
         }
     }
@@ -198,7 +187,6 @@ fun BlackListScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
         ) {
             Column {
                 /*TextField(
@@ -265,9 +253,53 @@ fun BlackListScreen(
                     }
 
                     if (words.isEmpty()) {
-                        Column {
-                            Row {
-                                //TODO: Доделать пример при пустом списке
+
+                        val rowModifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+
+                        Column(
+                            Modifier
+                                .padding(8.dp)
+                        ) {
+                            Row(
+                                rowModifier,
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = "Для добавления элементов нажмите значёк - ")
+                                Icon(imageVector = Icons.Default.Add, contentDescription = "Значёт добавить")
+                            }
+                            Row(
+                                rowModifier,
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                WordCard(wordObj = Word(word = "Пример"), selected = false, selectedForDelete = false)
+                                Text( text = " - так выгладит элемент")
+                            }
+                            Row(
+                                rowModifier,
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    text = "Чтобы элемент учитывался при вводе текста, нажмите на него"
+                                )
+                                WordCard(wordObj = Word(word = "Пример"), selected = true, selectedForDelete = false)
+                            }
+                            Row(
+                                rowModifier,
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    modifier = Modifier.weight(1f),
+                                    text = "Чтоб выделить элемент для удаления - удерживайте"
+                                )
+                                WordCard(wordObj = Word(word = "Пример"), selected = false, selectedForDelete = true)
                             }
                         }
                     }
@@ -279,7 +311,7 @@ fun BlackListScreen(
 
 @Composable
 private fun WordCard(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     wordObj: Word,
     selected: Boolean,
     selectedForDelete: Boolean
@@ -312,6 +344,7 @@ private fun WordCard(
 }
 
 
+/*
 @OptIn(
     ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class,
     ExperimentalFoundationApi::class
@@ -376,7 +409,8 @@ fun BlackListView(
     }
 
     Scaffold(
-        /*topBar = {
+        */
+/*topBar = {
             TopAppBar(
                 title = {
                     Text(
@@ -416,7 +450,8 @@ fun BlackListView(
                     }
                 }
             )
-        }*/
+        }*//*
+
     ) { padding ->
         Surface(
             modifier = Modifier
@@ -424,14 +459,16 @@ fun BlackListView(
                 .padding(padding), color = MaterialTheme.colorScheme.background
         ) {
             Column {
-                /*TextField(
+                */
+/*TextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = text,
                     onValueChange = { s ->
                         text = s
                         //updateFoundElements(selectedWords.value, text)
                     },
-                    label = { Text(stringResource(R.string.search)) })*/
+                    label = { Text(stringResource(R.string.search)) })*//*
+
 
                 Button(
                     modifier = Modifier
@@ -499,3 +536,4 @@ fun BlackListView(
         }
     }
 }
+*/
