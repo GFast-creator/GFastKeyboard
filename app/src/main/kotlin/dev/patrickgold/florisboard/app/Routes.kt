@@ -38,7 +38,7 @@ import dev.patrickgold.florisboard.app.settings.about.ThirdPartyLicensesScreen
 import dev.patrickgold.florisboard.app.settings.advanced.AdvancedScreen
 import dev.patrickgold.florisboard.app.settings.advanced.BackupScreen
 import dev.patrickgold.florisboard.app.settings.advanced.RestoreScreen
-import dev.patrickgold.florisboard.app.settings.blacklist.BlackListView
+import dev.patrickgold.florisboard.app.settings.blacklist.BlackListScreen
 import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.app.settings.clipboard.ClipboardScreen
 import dev.patrickgold.florisboard.app.settings.dictionary.DictionaryScreen
@@ -153,7 +153,8 @@ object Routes {
             startDestination = startDestination,
         ) {
             composable(Settings.BlackList) {
-                BlackListView(viewModel, onBackPressedDispatcher)
+                //BlackListView(viewModel, onBackPressedDispatcher)
+                BlackListScreen(viewModel, onBackPressedDispatcher)
             }
 
             composable(Setup.Screen) { SetupScreen() }

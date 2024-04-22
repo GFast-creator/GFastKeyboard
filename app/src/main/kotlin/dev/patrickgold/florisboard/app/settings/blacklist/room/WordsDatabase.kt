@@ -3,12 +3,13 @@ package dev.patrickgold.florisboard.app.settings.blacklist.room
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
-import androidx.room.AutoMigration
 import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
@@ -27,6 +28,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.patrickgold.florisboard.R
+import dev.patrickgold.florisboard.app.FlorisAppActivity
 import dev.patrickgold.florisboard.app.settings.blacklist.room.CONSTANTS.CHANNEL_ID
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Singleton
@@ -102,10 +104,20 @@ object HiltModule {
     @Singleton
     @Provides
     fun notificationBuilder(@ApplicationContext context: Context): NotificationCompat.Builder {
+
+        val resultIntent = Intent(context, FlorisAppActivity::class.java)
+        val resultPendingIntent = PendingIntent.getActivity(
+            context, 0, resultIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("List_app")
             .setSmallIcon(R.drawable.baseline_find_in_page_24)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(resultPendingIntent)
+            .setShowWhen(false)
+            .setOngoing(true)
     }
 
     @Singleton
