@@ -52,7 +52,7 @@ class StatisticalGlideTypingClassifier(context: Context) : GlideTypingClassifier
     companion object {
         /**
          * Describes the allowed length variance in a gesture. If a gesture is too long or too short, it is immediately
-         * discarded to save cycles.
+         * discarded to saveAll cycles.
          */
         private const val PRUNING_LENGTH_THRESHOLD = 8.42
 

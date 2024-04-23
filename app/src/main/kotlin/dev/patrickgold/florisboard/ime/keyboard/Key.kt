@@ -24,7 +24,7 @@ import dev.patrickgold.florisboard.lib.FlorisRect
 
 /**
  * Abstract class describing the smallest computed unit in a computed keyboard. Each key represents exactly one key
- * displayed in the UI. It allows to save the absolute location within the parent keyboard, save touch and visual
+ * displayed in the UI. It allows to saveAll the absolute location within the parent keyboard, saveAll touch and visual
  * bounds, managing the state (enabled, pressed, visibility) as well as layout sizing factors. Each key in this IME
  * inherits from this base key class. This allows for a inter-operable usage of a key without knowing the exact
  * subclass upfront.
@@ -83,19 +83,19 @@ abstract class Key(open val data: AbstractKeyData) {
     open var flayWidthFactor: Float = 0f
 
     /**
-     * The computed UI label of this key. This value is used by the keyboard view to temporarily save the label string
+     * The computed UI label of this key. This value is used by the keyboard view to temporarily saveAll the label string
      * for UI rendering and should not be set manually.
      */
     open var label: String? = null
 
     /**
-     * The computed UI hint label of this key. This value is used by the keyboard view to temporarily save the hint
+     * The computed UI hint label of this key. This value is used by the keyboard view to temporarily saveAll the hint
      * label string for UI rendering and should not be set manually.
      */
     open var hintedLabel: String? = null
 
     /**
-     * The computed ImageVector of this key. This value is used by the keyboard view to temporarily save the
+     * The computed ImageVector of this key. This value is used by the keyboard view to temporarily saveAll the
      * ImageVector for UI rendering and should not be set manually.
      */
     open var foregroundImageVector: ImageVector? = null

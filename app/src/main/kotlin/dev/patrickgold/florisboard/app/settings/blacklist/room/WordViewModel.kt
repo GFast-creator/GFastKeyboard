@@ -13,8 +13,6 @@ import dev.patrickgold.florisboard.app.settings.blacklist.room.CONSTANTS.NOTIFIC
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,8 +70,8 @@ class WordViewModel @Inject constructor(room: AppDatabase) : ViewModel() {
     }
     val deleteWordsObj = DeleteWordsObj
 
-    fun save(word: Word){
-        viewModelScope.launch { dao.insertAll(word) }
+    fun saveAll(vararg word: Word){
+        viewModelScope.launch { dao.insertAll(*word) }
     }
     fun delete(vararg word: Word){
         viewModelScope.launch{
