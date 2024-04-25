@@ -1,7 +1,5 @@
 package dev.patrickgold.florisboard.app.settings.blacklist
 
-import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,11 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Airplay
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.SystemUpdateAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -37,11 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import dev.patrickgold.florisboard.R
 import dev.patrickgold.florisboard.app.AppTheme
@@ -65,8 +58,6 @@ import dev.patrickgold.florisboard.app.settings.blacklist.room.Word
 import dev.patrickgold.florisboard.app.settings.blacklist.room.WordViewModel
 import dev.patrickgold.florisboard.lib.compose.FlorisScreen
 import dev.patrickgold.florisboard.ui.theme.FlorisBoardTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -116,7 +107,7 @@ fun BlackListScreen(
     val isDialog by viewModel.dialogStateObj.isDialogStateFlow.collectAsState()
     val selectedForDelete by viewModel.deleteWordsObj.stateFlowInstant.collectAsState()
 
-    val content = LocalContext.current
+
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val state by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
@@ -125,16 +116,18 @@ fun BlackListScreen(
     }
 
 
-
+    val context = LocalContext.current
     LaunchedEffect(state) {
         Log.i("killzoid", "Updated: $state")
 
         when (state) {
             //Отправка данных
             Lifecycle.State.CREATED,Lifecycle.State.STARTED -> {
-                WordContentResolver(content).run {
-                    if (multipleDeleteFlag) //обновление остольных только при удалении
+                WordContentResolver(context).run {
+                    if (multipleDeleteFlag) { //обновление остольных только при удалении
                         deleteAll()
+                        multipleDeleteFlag = false
+                    }
                     words.forEach {
                         insertWord(it)
                     }
@@ -142,10 +135,11 @@ fun BlackListScreen(
             }
             //Получение данных
             Lifecycle.State.RESUMED -> {
-                val newWords = WordContentResolver(content).allWordsRecords
-
-                viewModel.deleteAll()
-                viewModel.saveAll(*newWords.toTypedArray())
+                val newWords = WordContentResolver(context).allWordsRecords
+                if (newWords != null) {
+                    viewModel.deleteAll()
+                    viewModel.saveAll(*newWords.toTypedArray())
+                }
             }
 
             else -> {/* Nothing */}
@@ -178,6 +172,7 @@ fun BlackListScreen(
 
                 viewModel.delete(*selectedForDelete.toTypedArray())
                 viewModel.deleteWordsObj.update(emptyList())
+
 
             }) {
                 Icon(
