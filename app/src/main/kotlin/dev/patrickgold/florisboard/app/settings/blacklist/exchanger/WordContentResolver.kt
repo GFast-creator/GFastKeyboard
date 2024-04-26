@@ -5,9 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import dev.patrickgold.florisboard.app.settings.blacklist.room.Word
 
 class WordContentResolver(private var mContext: Context){
@@ -77,12 +75,12 @@ class WordContentResolver(private var mContext: Context){
     }
 
     fun deleteAll(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        //contentResolver.delete(Uri.parse("$URL/deleteAll"), null)
             try {
                 contentResolver.query( Uri.parse("$URL/deleteAll"), null,null,null,null)?.close()
             } catch (e: Exception) {
                 Log.e(TAG, "insertWord: Provider not found")
             }
-        }
+
     }
 }

@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Добавил для проверки существования content provider -->
+    <queries>
+        <package android:name="ru.gfastg98.myapplication" />
+
+        <provider android:authorities="ru.gfastg98.myapplication.provider.StorageProvider"/>
+    </queries>
+
     <!-- Permission needed to vibrate if the user has key press vibration enabled -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Permission needed to create notifications on devices running Android 13+ -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -149,7 +157,8 @@
             android:name=".ime.clipboard.provider.ClipboardMediaProvider"
             android:authorities="${applicationId}.provider.clipboard"
             android:exported="false"
-            android:grantUriPermissions="true"></provider> <!-- Default file provider to share files from the "files" or "cache" dir -->
+            android:grantUriPermissions="true"/> <!-- Default file provider to share files from the "files" or "cache" dir -->
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider.file"
