@@ -98,20 +98,6 @@
         </activity-alias>
 
         <activity
-            android:name=".app.settings.blacklist.BlackListActivity"
-            android:exported="true"
-            android:icon="@mipmap/floris_app_icon"
-            android:label="BlackList"
-            android:roundIcon="@mipmap/floris_app_icon_round"
-            android:theme="@style/FlorisAppTheme.Splash">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity> <!-- Import File Bridging Activity -->
-
-        <activity
             android:name=".app.ext.ImportFileActivity"
             android:exported="true"
             android:icon="@mipmap/floris_app_icon"
